@@ -14,8 +14,8 @@ export async function transactionRoutes(app: FastifyInstance) {
 
     await knexDb('transactions').insert({
       id: crypto.randomUUID(),
+      title,
       amount: type === 'credit' ? amount : amount * -1,
-      type,
       created_at: new Date(),
     })
 
