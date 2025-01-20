@@ -1,6 +1,7 @@
+import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 import type { FastifyInstance } from 'fastify'
-import { z } from 'zod'
 import { knexDb } from '../database'
+import { z } from 'zod'
 
 export async function transactionRoutes(app: FastifyInstance) {
   app.post('/', async (req, reply) => {
@@ -33,32 +34,63 @@ export async function transactionRoutes(app: FastifyInstance) {
     return reply.status(201).send()
   })
 
-  app.get('/', async () => {
-    const transactions = await knexDb('transactions').select()
+  app.get(
+    '/',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (req, reply) => {
+      const { sessionId } = req.cookies
 
-    return {
-      transactions,
+      const transactions = await knexDb('transactions')
+        .where('session_id', sessionId)
+        .select()
+
+      return {
+        transactions,
+      }
     }
-  })
+  )
 
-  app.get('/:id', async (req) => {
-    const getTransactionsParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
+  app.get(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (req) => {
+      const getTransactionsParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    const { id } = getTransactionsParamsSchema.parse(req.params)
+      const { sessionId } = req.cookies
+      const { id } = getTransactionsParamsSchema.parse(req.params)
 
-    // ? O ".first()" diz que só possui um resultado, então retorna somente o id
-    const transaction = await knexDb('transactions').where('id', id).first()
+      // ? O ".first()" diz que só possui um resultado, então retorna somente o id
+      const transaction = await knexDb('transactions')
+        .where({
+          id,
+          session_id: sessionId,
+        })
+        .first()
 
-    return transaction
-  })
+      return transaction
+    }
+  )
 
-  app.get('/summary', async () => {
-    const summary = await knexDb('transactions')
-      .sum('amount', { as: 'totalAmount' })
-      .first()
+  app.get(
+    '/summary',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (req) => {
+      const { sessionId } = req.cookies
 
-    return summary
-  })
+      const summary = await knexDb('transactions')
+        .where({ session_id: sessionId })
+        .sum('amount', { as: 'totalAmount' })
+        .first()
+
+      return summary
+    }
+  )
 }
