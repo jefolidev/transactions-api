@@ -135,7 +135,9 @@ dist
 # vuepress v2.x temp and cache directory
 
 .temp
-db/app.db
+
+# database
+db/*.db
 
 # Docusaurus cache and generated files
 

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun --watch src/server.ts ",
     "knex": "node --import tsx ./node_modules/knex/bin/cli.js",
+    "build": "tsup src",
     "test": "vitest"
   },
   "devDependencies": {
@@ -13,6 +14,7 @@
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "supertest": "^7.0.0",
+    "tsup": "^8.3.5",
     "vitest": "^3.0.2"
   },
   "peerDependencies": {

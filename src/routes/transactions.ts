@@ -62,8 +62,8 @@ export async function transactionRoutes(app: FastifyInstance) {
         id: z.string().uuid(),
       })
 
-      const { sessionId } = req.cookies
       const { id } = getTransactionsParamsSchema.parse(req.params)
+      const { sessionId } = req.cookies
 
       // ? O ".first()" diz que só possui um resultado, então retorna somente o id
       const transaction = await knexDb('transactions')
@@ -73,7 +73,7 @@ export async function transactionRoutes(app: FastifyInstance) {
         })
         .first()
 
-      return transaction
+      return { transaction }
     }
   )
 
@@ -90,7 +90,7 @@ export async function transactionRoutes(app: FastifyInstance) {
         .sum('amount', { as: 'totalAmount' })
         .first()
 
-      return summary
+      return {summary}
     }
   )
 }
